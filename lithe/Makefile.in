@@ -1,0 +1,26 @@
+# Makefile for Lithe.
+
+SHELL = '/bin/sh'
+
+default: all
+
+src:
+	$(MAKE) -C src
+
+syncs:
+	$(MAKE) -C syncs
+
+examples:
+	$(MAKE) -C examples
+
+install: src
+	$(MAKE) -C src install
+
+all: src syncs examples
+
+clean:
+	$(MAKE) clean -C src 
+	$(MAKE) clean -C syncs
+	$(MAKE) clean -C examples
+
+.PHONY: default src install all clean

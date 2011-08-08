@@ -1,0 +1,39 @@
+SHELL = '/bin/sh'
+
+default: all
+
+CXX = @CXX@
+CXXFLAGS = @CXXFLAGS@ -MMD -MP -I@prefix@/include
+LDFLAGS = @LDFLAGS@ 
+
+OBJS = spmd.o example.o
+OBJS_PTHREAD = spmd_pthread.o example_pthread.o
+OBJS_ALL = $(OBJS) $(OBJS_PTHREAD) 
+LIBS = -L@prefix@/lib  -llithe -lht -lpthread
+EXAMPLES = example example_pthread
+
+DEPS = $(patsubst %.o, %.d, $(OBJS_ALL))
+-include $(DEPS)
+
+all: $(EXAMPLES)
+
+example_pthread.o: example.cc
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
+
+%.o: %.cc
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
+
+example: $(OBJS)
+	$(CXX) -o $@ $(LDFLAGS) $(OBJS) $(LIBS)
+
+example_pthread: $(OBJS_PTHREAD) 
+	$(CXX) -o $@ $(LDFLAGS) $(OBJS_PTHREAD) -lpthread
+
+clean:
+	rm -f $(EXAMPLES) $(OBJS_ALL)
+
+dist-clean:
+	rm -f $(EXAMPLES) $(OBJS_ALL) $(DEPS) Makefile
+
+.PHONY: default all clean dist-clean 
+

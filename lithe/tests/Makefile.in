@@ -1,0 +1,72 @@
+# Makefile for Lithe tests.
+
+SHELL = '/bin/sh'
+comma = ,
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+abs_top_builddir = @abs_top_builddir@
+
+CC = @CC@
+CXX = @CXX@
+
+CFLAGS = @CFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
+
+LITHE_C_TESTS = lithe_simple_test test-parent test-mutex # lithe_hierarch_test
+
+LITHE_CXX_TESTS = test-scheduler
+
+LITHE_TESTS = $(LITHE_C_TESTS) $(LITHE_CXX_TESTS)
+
+OTHER_TESTS = atomic_test
+
+TESTS = $(LITHE_TESTS) $(OTHER_TESTS)
+
+LITHE_CFLAGS := $(CFLAGS) -MMD -MP -I$(top_srcdir)/src
+LITHE_LDFLAGS := -L$(abs_top_builddir)/src $(LDFLAGS)
+LITHE_LDFLAGS := $(LITHE_LDFLAGS) $(subst L,Wl$(comma)-R,$(LITHE_LDFLAGS))
+LITHE_LIBS := -llithe $(LIBS)
+
+OTHER_CFLAGS := -MMD -MP -I$(top_srcdir)/src
+OTHER_LDFLAGS := 
+OTHER_LIBS := -lpthread
+
+default: all
+
+-include $(patsubst %, %.d, $(TESTS))
+
+$(LITHE_TESTS): $(abs_top_builddir)/src/liblithe.a
+
+$(LITHE_C_TESTS): %: $(srcdir)/%.c
+	$(CC) $(LITHE_CFLAGS) -o $@ $< $(LITHE_LDFLAGS) $(LITHE_LIBS)
+
+$(LITHE_CXX_TESTS): %: $(srcdir)/%.cc
+	$(CXX) $(LITHE_CFLAGS) -o $@ $< $(LITHE_LDFLAGS) $(LITHE_LIBS)
+
+$(OTHER_TESTS): %: $(srcdir)/%.c
+	$(CC) $(OTHER_CFLAGS) -o $@ $< $(OTHER_LDFLAGS) $(OTHER_LIBS)
+
+test_launcher: $(srcdir)/test_launcher.c
+# TODO(benh): Kind of icky having these CFLAGS and LDFLAGS (with ht stuff) ...
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $<
+
+run: test_launcher
+	./test_launcher $(TESTS)
+
+install: all
+	$(error unimplemented)
+
+uninstall:
+	$(error unimplemented)
+
+dist:
+	$(error unimplemented)
+
+all: $(TESTS)
+
+clean:
+	rm -f $(TESTS) $(patsubst %, %.d, $(TESTS)) test_launcher 
+
+.PHONY: default install uninstall dist all clean

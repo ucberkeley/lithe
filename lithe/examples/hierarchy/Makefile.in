@@ -1,0 +1,30 @@
+SHELL = '/bin/sh'
+
+default: all
+
+CXX = @CXX@
+CXXFLAGS = @CXXFLAGS@ -MMD -MP -I@prefix@/include -I../spmd -I../../syncs
+LDFLAGS = @LDFLAGS@ 
+
+OBJS = ../spmd/spmd.o example.o 
+LIBS = -L@prefix@/lib -L../../syncs -llithesyncs -llithe -lht -lpthread
+EXAMPLE = example
+
+-include $(patsubst %.o, %.d, $(OBJS))
+
+all: $(EXAMPLE)
+
+%.o: %.cc
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
+
+example: $(OBJS)
+	$(CXX) -o $@ $(LDFLAGS) $(OBJS) $(LIBS)
+
+clean:
+	rm -f $(EXAMPLE) $(OBJS)
+
+dist-clean:
+	rm -f $(EXAMPLE) $(OBJS) $(patsubst %.o, %.d, $(OBJS)) Makefile
+
+.PHONY: default all clean dist-clean 
+

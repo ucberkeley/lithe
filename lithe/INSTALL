@@ -1,0 +1,17 @@
+Lithe currently only builds static libraries (liblithe.a). Also, Lithe
+needs to be built using a special GCC thread-local storage model (see
+src/Makefile.in).
+
+Example building Lithe in 'build' directory:
+
+$ mkdir build
+$ cd build
+$ ../configure --prefix=<installation directory>
+...
+$ make
+...
+$ make install
+...
+
+
+Please send questions and any other feedback to lithe@lists.eecs.berkeley.edu.

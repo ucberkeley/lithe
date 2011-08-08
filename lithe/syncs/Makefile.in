@@ -1,0 +1,29 @@
+SHELL = '/bin/sh'
+
+default: all
+
+CC = @CC@
+CFLAGS = @CFLAGS@ -MMD -MP -I@prefix@/include 
+LDFLAGS = @LDFLAGS@ 
+
+OBJS = lithe_barrier.o lithe_mutex.o 
+LIB = liblithesyncs.a
+
+-include $(patsubst %.o, %.d, $(OBJS))
+
+all: $(LIB)
+
+%.o: %.c
+	$(CC) -c $(CFLAGS) -o $@ $<
+
+$(LIB): $(OBJS)
+	$(AR) rcs $@ $(OBJS)
+
+clean:
+	rm -f $(LIB) $(OBJS)
+
+dist-clean:
+	rm -f $(LIB) $(OBJS) $(patsubst %.o, %.d, $(OBJS)) Makefile
+
+.PHONY: default all clean dist-clean 
+
